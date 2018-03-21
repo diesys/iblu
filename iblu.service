@@ -1,0 +1,8 @@
+[Unit]
+Description=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness
+
+[Service]
+ExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness
+
+[Install]
+WantedBy=multi-user.target
