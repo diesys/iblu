@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys, math, getpass
-version = "0.4"
+version = "0.4b"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness','r+')
 actual_brightness = int(actual_bl.read())
@@ -16,10 +16,10 @@ new_brightness = actual_brightness
 
 if(argvs == 2):
     option = sys.argv[1]
-    if(option == 'dec'):
+    if(option == 'dec' or option == 'd'):
         tmp = actual_brightness - 5 * shift_percent
         new_brightness = max(1, tmp)
-    elif(option == 'inc'):
+    elif(option == 'inc' or option == 'i'):
         tmp = actual_brightness + 5 * shift_percent
         new_brightness = min(max_brightness, tmp)
     else:
