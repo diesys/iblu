@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
 import sys, math, getpass
-version = "0.4b"
+version = "0.4c"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness','r+')
 actual_brightness = int(actual_bl.read())
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness','r')
 max_brightness = int(max_bl.read())
 
-help = "Intel Black Light Util · v" + version + "\n\nPlease insert a valid percentage or use inc/dec (i/d) options (optionally indicating the shift)\nExample: \"ibl d 20\" #decreases the blacklight of 20%, default is 5%"
+help = "Intel Black Light Util · v" + version + "\n\nPlease insert a valid percentage or use inc/dec (i/d) options (optionally indicating the shift)\nExample: \"ibl d 20\" #decreases the blacklight of 20%, default is 4%"
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 argvs = len(sys.argv)
 shift_percent = math.ceil(max_brightness/100)
@@ -17,10 +17,10 @@ new_brightness = actual_brightness
 if(argvs == 2):
     option = sys.argv[1]
     if(option == 'dec' or option == 'd'):
-        tmp = actual_brightness - 5 * shift_percent
+        tmp = actual_brightness - 4 * shift_percent
         new_brightness = max(1, tmp)
     elif(option == 'inc' or option == 'i'):
-        tmp = actual_brightness + 5 * shift_percent
+        tmp = actual_brightness + 4 * shift_percent
         new_brightness = min(max_brightness, tmp)
     else:
         perc = int(sys.argv[1])
