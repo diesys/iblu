@@ -2,7 +2,7 @@
 
 import sys, re
 # import getpass                        #useful for unit systemd
-version = "0.5d"
+version = "0.5e"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
@@ -15,7 +15,7 @@ shift_std_pc = 4                                        #unita' standard di aume
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
 argvs = len(sys.argv)
 
-help = "Intel Black Light Util · v" + version + "\n\nPlease insert a valid percentage or use inc/dec (i/d) options (optionally indicating the shift)\nExample: \"ibl d 20\" #decreases the blacklight of 20%, default is 4%"
+help = "Intel Black Light Util · v" + version + "\nPlease insert a valid percentage or use inc/dec (i/d) options (optionally indicating the shift)\nExample: \"ibl d 20\" #decreases the blacklight of 20%, default is 4%"
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
 #### todo
