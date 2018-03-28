@@ -2,7 +2,7 @@
 
 import sys, math, re
 # import getpass
-version = "0.5"
+version = "0.5b"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 actual_brightness = int(actual_bl.read())
@@ -19,20 +19,28 @@ shift_percent = math.ceil(max_brightness/100)
 percentize = 100/max_brightness
 new_brightness = actual_brightness
 
+## todo create function update info for polite coding, there are too many duplicates
+
 if(argvs == 2):
-    option = sys.argv[1]
-    if(option == 'dec' or option == 'd'):
+    # option = sys.argv[1]
+    if (re.search(r"[v]+", sys.argv[1])):                ##verbose
+        verbose = 1
+        act_percent = int(actual_brightness * percentize)
+        act_info = str(act_percent) + '% (' + str(actual_brightness) + '/' + str(max_brightness) + ')'
+
+    if(re.search(r"[d]|[dec]", sys.argv[1])):
         tmp = actual_brightness - 4 * shift_percent
         new_brightness = max(1, tmp)
-    elif(option == 'inc' or option == 'i'):
+        new_percent = int(new_brightness * percentize)
+        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
+        changed = 1
+    elif(re.search(r"[i]|[inc]", sys.argv[1])):
         tmp = actual_brightness + 4 * shift_percent
         new_brightness = min(max_brightness, tmp)
+        new_percent = int(new_brightness * percentize)
+        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
+        changed = 1
     else:
-        if (re.search(r"[v]+", sys.argv[1])):                ##verbose
-            verbose = 1
-            act_percent = int(actual_brightness * percentize)
-            act_info = str(act_percent) + '% (' + str(actual_brightness) + '/' + str(max_brightness) + ')'
-
         if(re.search(r"[0-9]+", sys.argv[1])):
             perc = int(re.findall(r"[0-9]+", sys.argv[1])[0])
 
@@ -54,8 +62,14 @@ elif(argvs == 3):
     #re.search(r"d", sys.argv[1])[0])
     if(option == 'dec' or option == 'd'):
         new_brightness = max(1, actual_brightness - int(sys.argv[2]) * shift_percent)
+        new_percent = int(new_brightness * percentize)
+        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
+        changed = 1
     elif(option == 'inc' or option == 'i'):
         new_brightness = min(max_brightness, actual_brightness + int(sys.argv[2]) * shift_percent)
+        new_percent = int(new_brightness * percentize)
+        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
+        changed = 1
 else:
     print(help)
 
