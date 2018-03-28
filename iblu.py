@@ -19,7 +19,11 @@ shift_percent = math.ceil(max_brightness/100)
 percentize = 100/max_brightness
 new_brightness = actual_brightness
 
-## todo create function update info for polite coding, there are too many duplicates
+#### todo
+
+# function update info for polite coding, there are too many duplicates
+# option for creating unit and enabling/disabling
+# capability to create keybindings, tty use or something not working with the DE
 
 if(argvs == 2):
     # option = sys.argv[1]
