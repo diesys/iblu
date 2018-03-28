@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, math, re
+import sys, re #, math
 # import getpass                        #useful for unit systemd
 version = "0.5b"
 
@@ -15,7 +15,7 @@ argvs = len(sys.argv)
 act_info = ''
 verbose = 0
 changed = 0
-shift_percent = math.ceil(max_brightness/100)
+shift_percent = int(max_brightness/100)
 percentize = 100/max_brightness
 new_brightness = actual_brightness
 
