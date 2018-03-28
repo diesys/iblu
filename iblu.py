@@ -1,103 +1,84 @@
 #!/usr/bin/python
 
-import sys, re #, math
+import sys, re
 # import getpass                        #useful for unit systemd
-version = "0.5b"
+version = "0.5d"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
-actual_brightness = int(actual_bl.read())
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
-max_brightness = int(max_bl.read())
+state = {'actual': int(actual_bl.read()), 'max': int(max_bl.read()), 'verbose': False, 'changed': False, 'actual_info': ''}
+percentize = 100/state['max']
+state['new'] = state['actual']
+state['actual_info'] = str(int(state['actual'] * percentize)) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
+shift_one_pc = int(state['max']/100)                    #unita' percentuale sulla luminosita' massima
+shift_std_pc = 4                                        #unita' standard di aumento/decremento in percentuale
+shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
+argvs = len(sys.argv)
 
 help = "Intel Black Light Util · v" + version + "\n\nPlease insert a valid percentage or use inc/dec (i/d) options (optionally indicating the shift)\nExample: \"ibl d 20\" #decreases the blacklight of 20%, default is 4%"
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
-argvs = len(sys.argv)
-act_info = ''
-verbose = 0
-changed = 0
-shift_percent = int(max_brightness/100)
-percentize = 100/max_brightness
-new_brightness = actual_brightness
 
 #### todo
-
-# function update info for polite coding, there are too many duplicates
+# rifare help
 # option for creating unit and enabling/disabling
 # capability to create keybindings, tty use or something not working with the DE
 
-if(argvs == 2):
-    # option = sys.argv[1]
-    if (re.search(r"[v]+", sys.argv[1])):                ##verbose
-        verbose = 1
-        act_percent = int(actual_brightness * percentize)
-        act_info = str(act_percent) + '% (' + str(actual_brightness) + '/' + str(max_brightness) + ')'
+def update_state(actual_brightness, new_brightness):
+    state['actual'] = int(actual_brightness)
+    state['actual_pc'] = int(state['actual'] * percentize)
+    state['new'] = int(new_brightness)
+    state['new_pc'] = int(state['new'] * percentize)
+    state['new_info'] = str(state['new_pc']) + '% (' + str(state['new']) + '/' + str(state['max']) + ')'
+    state['changed'] = True
 
-    if(re.search(r"[d]|[dec]", sys.argv[1])):
-        tmp = actual_brightness - 4 * shift_percent
-        new_brightness = max(1, tmp)
-        new_percent = int(new_brightness * percentize)
-        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
-        changed = 1
-    elif(re.search(r"[i]|[inc]", sys.argv[1])):
-        tmp = actual_brightness + 4 * shift_percent
-        new_brightness = min(max_brightness, tmp)
-        new_percent = int(new_brightness * percentize)
-        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
-        changed = 1
+if(argvs == 2):
+    option = sys.argv[1]
+    if(re.search(r"[v]+", option)):                ##verbose
+        state['verbose'] = True
+        state['actual_pc'] = int(state['actual'] * percentize)
+
+    if(re.search(r"[d]|[dec]", option)):
+        tmp = state['actual'] - shift_factor
+        state['new'] = max(1, tmp)
+        update_state(int(state['actual']), int(state['new']))
+    elif(re.search(r"[i]|[inc]", option)):
+        tmp = state['actual'] + shift_factor
+        state['new'] = min(state['max'], tmp)
+        update_state(int(state['actual']), int(state['new']))
     else:
-        if(re.search(r"[0-9]+", sys.argv[1])):
-            perc = int(re.findall(r"[0-9]+", sys.argv[1])[0])
+        if(re.search(r"[0-9]+", option)):
+            perc = int(re.findall(r"[0-9]+", option)[0])
 
             if(perc <= 0):
-                new_brightness = 1
+                state['new'] = 1
             elif(perc < 100):
-                new_brightness = min(perc * shift_percent, max_brightness)
-            elif(perc >= 100):
-                new_brightness = max_brightness
+                state['new'] = min(perc * shift_one_pc, state['max'])
+            elif(perc == 100):
+                state['new'] = state['max']
+            else:
+                print(help)
 
-            if not (new_brightness == actual_brightness):
-                new_percent = int(new_brightness * percentize)
-                new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
-                changed = 1
+            if not (state['new'] == state['actual']):
+                update_state(state['actual'], int(state['new']))
 
 elif(argvs == 3):
     option = sys.argv[1]
-    #re.search(r"d", sys.argv[1])[0]                    ###### TO DO implement regex for custom shift?
-    #re.search(r"d", sys.argv[1])[0])
+    increment_pc = int(sys.argv[2]) * shift_one_pc
     if(option == 'dec' or option == 'd'):
-        new_brightness = max(1, actual_brightness - int(sys.argv[2]) * shift_percent)
-        new_percent = int(new_brightness * percentize)
-        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
-        changed = 1
+        state['new'] = max(1, state['actual'] - increment_pc)
+        update_state(int(state['actual']), int(state['new']))
     elif(option == 'inc' or option == 'i'):
-        new_brightness = min(max_brightness, actual_brightness + int(sys.argv[2]) * shift_percent)
-        new_percent = int(new_brightness * percentize)
-        new_info = str(new_percent) + '% (' + str(new_brightness) + '/' + str(max_brightness) + ')'
-        changed = 1
+        state['new'] = min(state['max'], state['actual'] + increment_pc)
+        update_state(int(state['actual']), int(state['new']))
 else:
     print(help)
 
-if verbose:
-    if changed:
-        print("old: ", act_info)
-        print("new: ", new_info)
+if state['verbose']:
+    if state['changed']:
+        print("old: ", state['actual_info'])
+        print("new: ", state['new_info'])
     else:
-        print("actual: ", act_info)
+        print("actual: ", state['actual_info'])
 
-
-actual_bl.write(str(new_brightness))
+actual_bl.write(str(state['new']))
 actual_bl.close()
-
-
-# def output(verbose, perc):
-#     if verbose:
-#         act_percent = int(actual_brightness * percentize)
-#         act_info = "actual: " + str(act_percent) + '% (' + str(actual_brightness) + '/' + str(max_brightness) + ')'
-#
-#         if perc:
-#             new_percent = int(new_brightness * percentize)
-#             act_info += "new: " + str(act_percent) + '%'
-#
-#     print(act_info)
-#
-# output(verb, perc)
