@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys, math, re
-# import getpass
+# import getpass                        #useful for unit systemd
 version = "0.5b"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
