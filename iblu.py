@@ -10,7 +10,7 @@ state = {'actual': int(actual_bl.read()), 'max': int(max_bl.read()), 'changed': 
 state['new'] = state['actual']
 percentize = 100/state['max']
 shift_one_pc = int(state['max'])/100                    #unita' percentuale sulla luminosita' massima
-shift_std_pc = 4                                      #unita' standard di aumento/decremento in percentuale
+shift_std_pc = 3                                      #unita' standard di aumento/decremento in percentuale
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
 state['actual_pc'] = 0 if (state['actual'] < shift_one_pc-1) else math.ceil(int(state['actual']) * percentize)
 
