@@ -29,8 +29,7 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 def updateState(new_percent):
     new_percent = int(new_percent)
     new_brightness = math.floor(new_percent * shift_one_pc)
-    if(state['actual'] - new_brightness > 1):                   ## to prevent approx errors
-        print(state['actual'] - new_brightness < 1)
+    if(state['actual'] - new_brightness > 1):                   ## to prevent approx errors and 0 value errors
         if(new_percent <= 0):
             new_brightness = 1
         elif(new_percent < 100):
@@ -59,12 +58,12 @@ def verboseOut(print_state=False):
         print(state)
  
 def decrease(percentage=shift_std_pc):
-    updateState(int(state['actual']) - shift_one_pc * percentage)
-    #print(int(state['actual'] - shift_one_pc * percentage))
+    updateState(int(state['actual_pc']) - percentage)
+    #print(int(state['actual_pc'] - percentage))
 
 def increase(percentage=shift_std_pc):
-    updateState(int(state['actual']) + shift_one_pc * percentage)
-    #print(int(state['actual'] + shift_one_pc * percentage))
+    updateState(int(state['actual_pc']) + percentage)
+    #print(int(state['actual_pc'] + percentage))
 
 
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
@@ -109,6 +108,6 @@ if(len(sys.argv) == 2):                                              ## getting 
 if(state['invalid_option']):
     print(help)
 
+verboseOut(True)        ## debug
 actual_bl.write(str(state['new']))
 actual_bl.close()
-verboseOut(True)        ## debug
