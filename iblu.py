@@ -12,31 +12,31 @@ percentize = 100/state['max']
 state['actual_pc'] = int(state['actual'] * percentize)
 
 state['actual_info'] = str(int(state['actual'] * percentize)) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
-shift_one_pc = int(state['max']/100)                    #unita' percentuale sulla luminosita' massima
+shift_one_pc = int(state['max'])/100                    #unita' percentuale sulla luminosita' massima
 shift_std_pc = 4                                      #unita' standard di aumento/decremento in percentuale
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
-argvs = len(sys.argv)
 
 help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets to the given percentage\n\ti (inc)\t\tincreases the actual backlight\n\td (dec)\t\tdecreases the actual backlight\n\ta (act)\t\tshows the actual\n\tv\t\tshows verbose output\n"
 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
 #### todo
-### percentuale sbagliata
 ### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI
 # === futuro
 # = option for creating unit and enabling/disabling
 # = capability to create keybindings, tty use or something not working with the DE
 
-def updateState(new_brightness):
-    new_brightness = int(new_brightness)
-    if(new_brightness != state['actual_pc']):
-        if(new_brightness <= 0):
-            state['new'] = 1
-        elif(new_brightness < 100):
-            state['new'] = min(new_brightness * shift_one_pc, state['max'])
+def updateState(new_percent):
+    new_percent = int(new_percent)
+    new_brightness = int(new_percent * shift_one_pc)
+    if(new_brightness != state['actual']):
+        if(new_percent <= 0):
+            new_brightness = 1
+        elif(new_percent < 100):
+            new_brightness = min(new_percent * shift_one_pc, state['max'])
+            # print(new_brightness, state['max'])
         elif(new_brightness == 100):
-            state['new'] = state['max']
+            new_brightness = state['max']
     
         state['changed'] = True
     
@@ -44,29 +44,31 @@ def updateState(new_brightness):
         state['changed'] = False
 
     state['new'] = int(new_brightness)
-    state['new_pc'] = int(state['new'] * percentize)
+    state['new_pc'] = new_percent
     state['new_info'] = str(state['new_pc']) + '% (' + str(state['new']) + '/' + str(state['max']) + ')'
     state['invalid_option'] = False
     
-    verboseOut()        ## debug
+    verboseOut(True)        ## debug
 
-def verboseOut():
+def verboseOut(print_state=False):
     if state['changed']:
         print("old: ", state['actual_info'])
         print("new: ", state['new_info'])
     else:
         print("actual: ", state['actual_info'])
+    
+    if(print_state):
+        print(state)
  
 def decrease(percentage=shift_std_pc):
-    updateState(int(state['actual'] - shift_one_pc * percentage))
+    updateState(int(state['actual']) - shift_one_pc * percentage)
     print(int(state['actual'] - shift_one_pc * percentage))
 
 def increase(percentage=shift_std_pc):
-    updateState(int(state['actual'] + shift_one_pc * percentage))
+    updateState(int(state['actual']) + shift_one_pc * percentage)
     print(int(state['actual'] + shift_one_pc * percentage))
 
 
-###
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
     option = sys.argv[1]
 
