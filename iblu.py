@@ -2,7 +2,7 @@
 
 import sys, re, math
 # import getpass                        #useful for unit systemd
-version = "0.7"
+version = "0.8"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
@@ -16,12 +16,14 @@ state['actual_pc'] = 0 if (state['actual'] < shift_one_pc-1) else math.ceil(int(
 
 state['actual_info'] = str(state['actual_pc']) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
 
-help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets to the given percentage\n\ti (inc)\t\tincreases the actual backlight\n\td (dec)\t\tdecreases the actual backlight\n\ta (act)\t\tshows the actual\n\tv\t\tshows verbose output\n"
+help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\ta (act)\t\tshows the actual\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)"
 
-unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown jake:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
+unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown USER:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
 #### todo
 ### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI
+### migliore verbose mode/debug su OFF
+# blank screen
 # === futuro
 # = option for creating unit and enabling/disabling
 # = capability to create keybindings, tty use or something not working with the DE
@@ -59,51 +61,58 @@ def verboseOut(print_state=False):
  
 def decrease(percentage=shift_std_pc):
     updateState(int(state['actual_pc']) - percentage)
-    #print(int(state['actual_pc'] - percentage))
 
 def increase(percentage=shift_std_pc):
     updateState(int(state['actual_pc']) + percentage)
-    #print(int(state['actual_pc'] + percentage))
 
 
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
     option = sys.argv[1]
 
-    if(re.search(r"^[v]{0,1}[100]{1}$|^[100]{1}[v]{0,1}$|^[v]{0,1}[0-9]{1,2}$|^[0-9]{1,2}[v]{0,1}$", option)):  ## percentage
+    if(re.search(r"^[v|V]{0,1}[100]{1}$|^[100]{1}[v|V]{0,1}$|^[v|V]{0,1}[0-9]{1,2}$|^[0-9]{1,2}[v|V]{0,1}$", option)):  ## percentage
         input_number = re.findall(r"100|[0-9]{0,2}", option)
         if(input_number[0]):
-            # setPercent(input_number[0])
             updateState(input_number[0])
         elif(input_number[1]):
-            # setPercent(input_number[1])
             updateState(input_number[1])
-        if(re.search(r"[v]{1}", option)):                                                 ## verbose
-            verboseOut()
+        if(re.search(r"[v|V]{1}", option)):                                                 ## verbose
+            debug = True if(re.search(r"V", option)) else False
+            verboseOut(debug)
 
-    if(re.search(r"^[v]{0,1}d$|^d[v]{0,1}$|^[v]{0,1}dec$|^dec[v]{0,1}$", option)):                                  ## decrease bl by a step
+    if(re.search(r"^[v|V]{0,1}d$|^d[v|V]{0,1}$|^[v|V]{0,1}dec$|^dec[v|V]{0,1}$", option)):                                  ## decrease bl by a step
         decrease()
-        # print(re.findall(r"^d$", option)[0])
-        if(re.search(r"[v]{1}", option)):                                                 ## verbose
-            verboseOut()
+        if(re.search(r"[v|V]{1}", option)):                                                 ## verbose
+            debug = True if(re.search(r"V", option)) else False
+            verboseOut(debug)
 
     if(re.search(r"^d[0-9]{1,2}$|^dec[0-9]{1,2}$|^[0-9]{1,2}d$|^[0-9]{1,2}dec$", option)):                               ## dec bl by percentage
         decrease(int(re.findall(r"[0-9]{1,2}", option)[0]))
-        if(re.search(r"[v]{1}", option)):                                                 ## verbose
-            verboseOut()
+        if(re.search(r"[v|V]{1}", option)):                                                 ## verbose
+            debug = True if(re.search(r"V", option)) else False
+            verboseOut(debug)
 
     if(re.search(r"^i$|^inc$", option)):                                       ## increase bl by a step
         increase()
-        if(re.search(r"[v]{1}", option)):                                                 ## verbose
-            verboseOut()
+        if(re.search(r"[v|V]{1}", option)):                                                 ## verbose
+            debug = True if(re.search(r"V", option)) else False
+            verboseOut(debug)
 
     if(re.search(r"^i[0-9]{1,2}$|^inc[0-9]{1,2}$|^[0-9]{1,2}i$|^[0-9]{1,2}inc$", option)):                                ## inc bl by percentage
         increase(int(re.findall(r"[0-9]{1,2}", option)[0]))
-        if(re.search(r"[v]{1}", option)):                                                 ## verbose
-            verboseOut()
+        if(re.search(r"[v|V]{1}", option)):                                                 ## verbose
+            debug = True if(re.search(r"V", option)) else False
+            verboseOut(debug)
     
     if(re.search(r"^a$|^act$", option)):                                  ## see actual bl
         state['invalid_option'] = False
-        verboseOut()
+        debug = True if(re.search(r"V", option)) else False
+        verboseOut(debug)
+    
+    if(re.search(r"^OFF$", option)):                                  ## see actual bl
+        state['invalid_option'] = False
+        state['new'] = 0
+        debug = True if(re.search(r"V", option)) else False
+        verboseOut(debug)
 
 if(state['invalid_option']):
     print(help)
