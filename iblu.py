@@ -2,7 +2,7 @@
 
 import sys, re, math
 # import getpass                        #useful for unit systemd
-version = "0.6c"
+version = "0.7"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
@@ -86,7 +86,7 @@ if(len(sys.argv) == 2):                                              ## getting 
         if(re.search(r"[v]{1}", option)):                                                 ## verbose
             verboseOut()
 
-    if(re.search(r"^d[0-9]{1,2}$|^dec[0-9]{1,2}$", option)):                               ## dec bl by percentage
+    if(re.search(r"^d[0-9]{1,2}$|^dec[0-9]{1,2}$|^[0-9]{1,2}d$|^[0-9]{1,2}dec$", option)):                               ## dec bl by percentage
         decrease(int(re.findall(r"[0-9]{1,2}", option)[0]))
         if(re.search(r"[v]{1}", option)):                                                 ## verbose
             verboseOut()
@@ -96,7 +96,7 @@ if(len(sys.argv) == 2):                                              ## getting 
         if(re.search(r"[v]{1}", option)):                                                 ## verbose
             verboseOut()
 
-    if(re.search(r"^i[0-9]{1,2}$|^inc[0-9]{1,2}$", option)):                                ## inc bl by percentage
+    if(re.search(r"^i[0-9]{1,2}$|^inc[0-9]{1,2}$|^[0-9]{1,2}i$|^[0-9]{1,2}inc$", option)):                                ## inc bl by percentage
         increase(int(re.findall(r"[0-9]{1,2}", option)[0]))
         if(re.search(r"[v]{1}", option)):                                                 ## verbose
             verboseOut()
@@ -108,6 +108,7 @@ if(len(sys.argv) == 2):                                              ## getting 
 if(state['invalid_option']):
     print(help)
 
-verboseOut(True)        ## debug
+
+#verboseOut(True)        ## debug
 actual_bl.write(str(state['new']))
 actual_bl.close()
