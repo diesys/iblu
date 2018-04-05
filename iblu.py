@@ -29,7 +29,7 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 def updateState(new_percent):
     new_percent = int(new_percent)
     new_brightness = math.floor(new_percent * shift_one_pc)
-    if(state['actual'] - new_brightness > 1):                   ## to prevent approx errors and 0 value errors
+    if(state['actual'] - new_brightness > 1 ):                   ## to prevent approx errors and 0 value errors
         if(new_percent <= 0):
             new_brightness = 1
         elif(new_percent < 100):
@@ -43,7 +43,7 @@ def updateState(new_percent):
         state['changed'] = False
 
     state['new'] = max(int(new_brightness), 1)             ## to prevent blank screen
-    state['new_pc'] = new_percent
+    state['new_pc'] = 0 if (new_percent < 0) else new_percent
     state['new_info'] = str(state['new_pc']) + '% (' + str(state['new']) + '/' + str(state['max']) + ')'
     state['invalid_option'] = False
 
