@@ -23,7 +23,6 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 #### todo
 ### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI
 ### migliore verbose mode/debug su OFF
-# blank screen
 # === futuro
 # = option for creating unit and enabling/disabling
 # = capability to create keybindings, tty use or something not working with the DE
