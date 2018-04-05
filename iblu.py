@@ -1,17 +1,17 @@
 #!/usr/bin/python
 
-import sys, re
+import sys, re, math
 # import getpass                        #useful for unit systemd
-version = "0.6a"
+version = "0.6c"
 
 actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
-state = {'actual': int(actual_bl.read()), 'max': int(max_bl.read()), 'verbose': False, 'changed': False, 'actual_info': '', 'invalid_option': True}
+state = {'actual': int(actual_bl.read()), 'max': int(max_bl.read()), 'changed': False, 'actual_info': '', 'invalid_option': True}
 state['new'] = state['actual']
 percentize = 100/state['max']
-state['actual_pc'] = int(state['actual'] * percentize)
+state['actual_pc'] = math.ceil(int(state['actual']) * percentize)
 
-state['actual_info'] = str(int(state['actual'] * percentize)) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
+state['actual_info'] = str(math.ceil(state['actual'] * percentize)) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
 shift_one_pc = int(state['max'])/100                    #unita' percentuale sulla luminosita' massima
 shift_std_pc = 4                                      #unita' standard di aumento/decremento in percentuale
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
@@ -28,13 +28,12 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 
 def updateState(new_percent):
     new_percent = int(new_percent)
-    new_brightness = int(new_percent * shift_one_pc)
+    new_brightness = math.ceil(new_percent * shift_one_pc)
     if(new_brightness != state['actual']):
         if(new_percent <= 0):
             new_brightness = 1
         elif(new_percent < 100):
             new_brightness = min(new_percent * shift_one_pc, state['max'])
-            # print(new_brightness, state['max'])
         elif(new_brightness == 100):
             new_brightness = state['max']
     
@@ -62,11 +61,11 @@ def verboseOut(print_state=False):
  
 def decrease(percentage=shift_std_pc):
     updateState(int(state['actual']) - shift_one_pc * percentage)
-    print(int(state['actual'] - shift_one_pc * percentage))
+    #print(int(state['actual'] - shift_one_pc * percentage))
 
 def increase(percentage=shift_std_pc):
     updateState(int(state['actual']) + shift_one_pc * percentage)
-    print(int(state['actual'] + shift_one_pc * percentage))
+    #print(int(state['actual'] + shift_one_pc * percentage))
 
 
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
