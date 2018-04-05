@@ -21,7 +21,7 @@ help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown USER:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
 #### todo
-### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI
+### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI (utile per parametri giusti e no e semplificare regex)
 ### migliore verbose mode/debug su OFF
 # === futuro
 # = option for creating unit and enabling/disabling
