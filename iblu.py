@@ -49,14 +49,13 @@ def updateState(new_percent):
     state['invalid_option'] = False
 
 def verboseOut(print_state=False):
-    if state['changed']:
-        print("old: ", state['actual_info'])
-        print("new: ", state['new_info'])
-    else:
-        print("actual: ", state['actual_info'])
- 
     if(print_state):
-        print(state)
+        if state['changed']:
+            print("old: ", state['actual_info'])
+            print("new: ", state['new_info'])
+        else:
+            print("actual: ", state['actual_info'])
+
  
 def decrease(percentage=shift_std_pc):
     updateState(int(state['actual_pc']) - percentage)
