@@ -4,19 +4,19 @@ import sys, re, math
 # import getpass                        #useful for unit systemd
 version = "0.8"
 
-actual_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
+current_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
-state = {'actual': int(actual_bl.read()), 'max': int(max_bl.read()), 'changed': False, 'actual_info': '', 'invalid_option': True}
-state['new'] = state['actual']
+state = {'current': int(current_bl.read()), 'max': int(max_bl.read()), 'changed': False, 'current_info': '', 'invalid_option': True}
+state['new'] = state['current']
 percentize = 100/state['max']
 shift_one_pc = int(state['max'])/100                    #unita' percentuale sulla luminosita' massima
 shift_std_pc = 3                                      #unita' standard di aumento/decremento in percentuale
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
-state['actual_pc'] = 0 if (state['actual'] < shift_one_pc-1) else math.ceil(int(state['actual']) * percentize)
+state['current_pc'] = 0 if (state['current'] < shift_one_pc-1) else math.ceil(int(state['current']) * percentize)
 
-state['actual_info'] = str(state['actual_pc']) + '% (' + str(state['actual']) + '/' + str(state['max']) + ')'
+state['current_info'] = str(state['current_pc']) + '% (' + str(state['current']) + '/' + str(state['max']) + ')'
 
-help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\ta (act)\t\tshows the actual\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)"
+help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)"
 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown USER:wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
@@ -30,7 +30,7 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 def updateState(new_percent):
     new_percent = int(new_percent)
     new_brightness = math.floor(new_percent * shift_one_pc)
-    if(state['actual'] - new_brightness > 1 ):                   ## to prevent approx errors and 0 value errors
+    if(state['current'] - new_brightness > 1 ):                   ## to prevent approx errors and 0 value errors
         if(new_percent <= 0):
             new_brightness = 1
         elif(new_percent < 100):
@@ -49,19 +49,20 @@ def updateState(new_percent):
     state['invalid_option'] = False
 
 def verboseOut(print_state=False):
+    if state['changed']:
+        print("old: ", state['current_info'])
+        print("new: ", state['new_info'])
+    else:
+        print("current: ", state['current_info'])
+ 
     if(print_state):
-        if state['changed']:
-            print("old: ", state['actual_info'])
-            print("new: ", state['new_info'])
-        else:
-            print("actual: ", state['actual_info'])
-
+        print(state)
  
 def decrease(percentage=shift_std_pc):
-    updateState(int(state['actual_pc']) - percentage)
+    updateState(int(state['current_pc']) - percentage)
 
 def increase(percentage=shift_std_pc):
-    updateState(int(state['actual_pc']) + percentage)
+    updateState(int(state['current_pc']) + percentage)
 
 
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
@@ -101,12 +102,12 @@ if(len(sys.argv) == 2):                                              ## getting 
             debug = True if(re.search(r"V", option)) else False
             verboseOut(debug)
     
-    if(re.search(r"^a$|^act$", option)):                                  ## see actual bl
+    if(re.search(r"^c$|^curr$", option)):                                  ## see current bl
         state['invalid_option'] = False
         debug = True if(re.search(r"V", option)) else False
         verboseOut(debug)
     
-    if(re.search(r"^OFF$", option)):                                  ## see actual bl
+    if(re.search(r"^OFF$", option)):                                  ## see current bl
         state['invalid_option'] = False
         state['new'] = 0
         debug = True if(re.search(r"V", option)) else False
@@ -117,5 +118,5 @@ if(state['invalid_option']):
 
 
 #verboseOut(True)        ## debug
-actual_bl.write(str(state['new']))
-actual_bl.close()
+current_bl.write(str(state['new']))
+current_bl.close()
