@@ -16,7 +16,7 @@ state['current_pc'] = 0 if (state['current'] < shift_one_pc-1) else math.ceil(in
 
 state['current_info'] = str(state['current_pc']) + '% (' + str(state['current']) + '/' + str(state['max']) + ')'
 
-help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)"
+help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n"
 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown " + getpass.getuser() + ":wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
