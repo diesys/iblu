@@ -2,7 +2,7 @@
 
 import sys, re, math, getpass
 # import getpass                        #useful for unit systemd
-version = "0.8"
+version = "0.9"
 
 current_bl = open('/sys/class/backlight/intel_backlight/brightness', 'r+')
 max_bl = open('/sys/class/backlight/intel_backlight/max_brightness', 'r')
