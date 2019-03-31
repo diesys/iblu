@@ -120,8 +120,8 @@ if(len(sys.argv) == 2):                                              ## getting 
         debug = True if(re.search(r"V", option)) else False
         verboseOut(debug)
     
-    # install unit systemd file
-    if(re.search(r"^--install$", option)):                                  
+    # prints the systemd unit file
+    if(re.search(r"^--UNIT$", option)):                                  
         state['invalid_option'] = False
         print(unit) 
         # debug = True if(re.search(r"V", option)) else False
