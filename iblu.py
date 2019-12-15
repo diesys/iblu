@@ -10,13 +10,14 @@ state = {'current': int(current_bl.read()), 'max': int(max_bl.read()), 'changed'
 state['new'] = state['current']
 percentize = 100/state['max']
 shift_one_pc = int(state['max'])/100                    #unita' percentuale sulla luminosita' massima
-shift_std_pc = 3                                      #unita' standard di aumento/decremento in percentuale
+shift_std_pc = 3                                        #unita' standard di aumento/decremento in percentuale
 shift_factor = shift_std_pc * shift_one_pc              #fattore moltiplicativo non in percentuale
 state['current_pc'] = 0 if (state['current'] < shift_one_pc-1) else math.ceil(int(state['current']) * percentize)
 
 state['current_info'] = str(state['current_pc']) + '% (' + str(state['current']) + '/' + str(state['max']) + ')'
 
-help = "Intel Black Light Util · v" + version + "\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n"
+help = "   _ __   __\n  (_) / / / _ __\n / / _ \/ / // /\n/_/_.__/_/\_,_/ v" + version + "\
+\nIntel Black Light Util:\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n"
 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown " + getpass.getuser() + ":wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
@@ -121,11 +122,42 @@ if(len(sys.argv) == 2):                                              ## getting 
         verboseOut(debug)
     
     # prints the systemd unit file
-    if(re.search(r"^--UNIT$", option)):                                  
+    if(re.search(r"^UNIT$", option)):                                  
         state['invalid_option'] = False
         print(unit) 
         # debug = True if(re.search(r"V", option)) else False
         # verboseOut(debug)
+    
+    # prints the systemd unit file
+#    if(re.search(r"^CACCA$", option)):                                  
+#        cacca="                                  `:`      .                     
+#                          :s:    `yho    -sh`     ``             
+#                  `:-     yhho` .yhhh- -shhh   ./sy.             
+#                  -hhy/. -hdddhsdmNNNmdmNmmd:/shhh:   `.-`       
+#                  -hhhdhhdmmhyso+//////+osydmNMNmy--/syy+`       
+#                  .dmmdy+:.``              ``./sdNNNmds-    ``   
+#                   /:.`         `...            `.+dMNs//osyo-   
+#              `ooo  hdm:        +NNy               `/mMNdho-`    
+#           `` `NNN` dMM+        +MMd                 .mMN:-..... 
+#   `..-:+oyh`  ::/` hMMs::::-`  :MMm  oss.   shh-     /MMdhhys+- 
+#  -oyhhhdmN-   dNN- yMMNmmmMNd- -MMN  mMM/   mMM+     `NMmo:.`   
+#   `.:+ymM+    dMM/ sMMh...yMMy .MMM` dMM+   dMMo     `NMmo+/:-.`
+#  `..-/sMm`    hMM+ oMMd   +MMd `MMM. yMMo   hMMs     oMMdhyyso/`
+#.+oyhhhmMs     yMMo /MMm   /MMd  NMM- sMMy   sMMy    /NMm+-.`    
+# ``.--+mMy     oMMs -MMN:::yMMh  dMM: /NMNyyymMMh  `sNMNdhs+:.`  
+#  `.:oymMN.    -dNy  odmmmmmmy.  .oh:  :syyyyyss+  yMNmhyyyyyo-  
+#`/oyyyyyNMd-    `-.   `..````                    `./+:....```    
+# `````.:hNMNo.                              ``-+ydN/             
+#    .+yhhhmMMNy+.``                  ``..:+shmMMMMNh`            
+#   -o+/:--:dmMMMMmhyo+/:::---:://+osyhdNMMMMMMNNmddho            
+#        `/hhhhhdNMMMMMMMMMMMMMMMMMMMMMMMNNNmms--/oyyh`           
+#       `oyo/-``shddddmmNNNNNNNNNmmmmmdds+yhhhy     `.            
+#       ``     +hhy/-`hhhhy+shhhhs:shhhh`  -+yh`                  
+#             .y+-   `hhh/` `hhho`  :hhs     `.                   
+#                    `y+`    /ho     .+.                          
+#                             .\n\n\n\                        
+#"
+#        print(cacca) 
 
 if(state['invalid_option']):
     print(help)
