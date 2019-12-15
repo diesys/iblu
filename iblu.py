@@ -42,9 +42,6 @@ def updateState(new_percent):
             new_brightness = min(new_percent * shift_one_pc, state['max'])
         elif(new_brightness == 100):
             new_brightness = state['max']
-    
-        # state['changed'] = True
-    
     else:
         state['changed'] = False
 
