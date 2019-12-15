@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys, re, math, getpass
 # import getpass                        #useful for unit systemd
@@ -17,14 +17,18 @@ state['current_pc'] = 0 if (state['current'] < shift_one_pc-1) else math.ceil(in
 state['current_info'] = str(state['current_pc']) + '% (' + str(state['current']) + '/' + str(state['max']) + ')'
 
 help = "   _ __   __\n  (_) / / / _ __\n / / _ \/ / // /\n/_/_.__/_/\_,_/ v" + version + "\
-\nIntel Black Light Util:\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n"
+\nIntel Black-Light Util:\n\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n"
 
 unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/blacklight/intel_blacklight/brightness\n\n[Service]\nExecStart=/usr/bin/chown " + getpass.getuser() + ":wheel /sys/class/backlight/intel_backlight/brightness\n\n[Install]\nWantedBy=multi-user.target\n"
 
-#### todo
+
+### TODO
+#   - import HELP structure, version 'calcRevision', directory structure and install/update from MoToGIF
+#   - attivare/disattivare/controllare stato direttamente della unit systemd da iblu
+# ····························
 ### FARE UNA REGEX ALL'INIZIO E POI LE SOTTOSELEZIONI CON LE PIU SEMPLICI (utile per parametri giusti e no e semplificare regex)
 ### migliore verbose mode/debug su OFF
-# === futuro
+# ··········· futuro
 # = option for creating unit and enabling/disabling
 # = capability to create keybindings, tty use or something not working with the DE
 
@@ -39,7 +43,7 @@ def updateState(new_percent):
         elif(new_brightness == 100):
             new_brightness = state['max']
     
-        state['changed'] = True
+        # state['changed'] = True
     
     else:
         state['changed'] = False
@@ -48,6 +52,7 @@ def updateState(new_percent):
     state['new_pc'] = 0 if (new_percent < 0) else new_percent
     state['new_info'] = str(state['new_pc']) + '% (' + str(state['new']) + '/' + str(state['max']) + ')'
     state['invalid_option'] = False
+    state['changed'] = True
 
 def verboseOut(print_state=False):
     if state['changed']:
@@ -64,6 +69,25 @@ def decrease(percentage=shift_std_pc):
 
 def increase(percentage=shift_std_pc):
     updateState(int(state['current_pc']) + percentage)
+
+
+# revision for exact verson number based on git
+def calcRevision():
+	if re.search('^[0-9]+.[0-9]+$', state['version']):
+		cwd = Path.cwd()
+		chdir(state['src_dir'])
+		if Path('.git').exists():
+			# using git number of commit, adding revision to the major version
+			git_log = run(['git', 'log', '--oneline'], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+			# the new command to be compiled (down)
+			update_version = "state['version']=str('" + str(state['version']) + "'+'-'+'" + str(len(re.findall('\n', git_log.stdout))) + "');"
+			# write it in the HELP too
+			update_version += "HELP['version']+=state['version']"
+			chdir(cwd)
+		
+		# the new command being compiled and evaluated, so the revision is added to the major version (A.BC-XY)
+		newcode=compile(update_version, "",'exec')
+		eval(newcode)
 
 
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
@@ -125,44 +149,11 @@ if(len(sys.argv) == 2):                                              ## getting 
     if(re.search(r"^UNIT$", option)):                                  
         state['invalid_option'] = False
         print(unit) 
-        # debug = True if(re.search(r"V", option)) else False
-        # verboseOut(debug)
-    
-    # prints the systemd unit file
-#    if(re.search(r"^CACCA$", option)):                                  
-#        cacca="                                  `:`      .                     
-#                          :s:    `yho    -sh`     ``             
-#                  `:-     yhho` .yhhh- -shhh   ./sy.             
-#                  -hhy/. -hdddhsdmNNNmdmNmmd:/shhh:   `.-`       
-#                  -hhhdhhdmmhyso+//////+osydmNMNmy--/syy+`       
-#                  .dmmdy+:.``              ``./sdNNNmds-    ``   
-#                   /:.`         `...            `.+dMNs//osyo-   
-#              `ooo  hdm:        +NNy               `/mMNdho-`    
-#           `` `NNN` dMM+        +MMd                 .mMN:-..... 
-#   `..-:+oyh`  ::/` hMMs::::-`  :MMm  oss.   shh-     /MMdhhys+- 
-#  -oyhhhdmN-   dNN- yMMNmmmMNd- -MMN  mMM/   mMM+     `NMmo:.`   
-#   `.:+ymM+    dMM/ sMMh...yMMy .MMM` dMM+   dMMo     `NMmo+/:-.`
-#  `..-/sMm`    hMM+ oMMd   +MMd `MMM. yMMo   hMMs     oMMdhyyso/`
-#.+oyhhhmMs     yMMo /MMm   /MMd  NMM- sMMy   sMMy    /NMm+-.`    
-# ``.--+mMy     oMMs -MMN:::yMMh  dMM: /NMNyyymMMh  `sNMNdhs+:.`  
-#  `.:oymMN.    -dNy  odmmmmmmy.  .oh:  :syyyyyss+  yMNmhyyyyyo-  
-#`/oyyyyyNMd-    `-.   `..````                    `./+:....```    
-# `````.:hNMNo.                              ``-+ydN/             
-#    .+yhhhmMMNy+.``                  ``..:+shmMMMMNh`            
-#   -o+/:--:dmMMMMmhyo+/:::---:://+osyhdNMMMMMMNNmddho            
-#        `/hhhhhdNMMMMMMMMMMMMMMMMMMMMMMMNNNmms--/oyyh`           
-#       `oyo/-``shddddmmNNNNNNNNNmmmmmdds+yhhhy     `.            
-#       ``     +hhy/-`hhhhy+shhhhs:shhhh`  -+yh`                  
-#             .y+-   `hhh/` `hhho`  :hhs     `.                   
-#                    `y+`    /ho     .+.                          
-#                             .\n\n\n\                        
-#"
-#        print(cacca) 
 
 if(state['invalid_option']):
     print(help)
 
-
+# writing the file.. actual changing brightness
 #verboseOut(True)        ## debug
 current_bl.write(str(state['new']))
 current_bl.close()
