@@ -141,9 +141,9 @@ def increase(percentage=shift_std_pc):
     updateState(int(state['current_pc']) + percentage)
 
 
+calcRevision()
 if(len(sys.argv) == 2):                                              ## getting parameters if exist
     option = sys.argv[1]
-    calcRevision()
 
     # percentage set
     if(re.search(r"^[v|V]{0,1}[100]{1}$|^[100]{1}[v|V]{0,1}$|^[v|V]{0,1}[0-9]{1,2}$|^[0-9]{1,2}[v|V]{0,1}$", option)):  ## percentage
@@ -186,13 +186,11 @@ if(len(sys.argv) == 2):                                              ## getting 
     
     # current info
     elif(re.search(r"^c$|^curr$", option)):                                  ## see current bl
-        # state['invalid_option'] = False
         debug = True if(re.search(r"V", option)) else False
         verboseOut(debug)
     
     # install
     elif(re.search(r"^--install(-git)*$", option)):                                  
-        # state['invalid_option'] = False
         promptHelp('Installing ...', ['asciiart', 'version'])
         if len(sys.argv) == 3 and re.search("^git$", sys.argv[2]):
             install('git')
@@ -210,18 +208,15 @@ if(len(sys.argv) == 2):                                              ## getting 
 
     # turns off
     elif(re.search(r"^OFF$", option)):                                  
-        # state['invalid_option'] = False
         state['new'] = 0
         debug = True if(re.search(r"V", option)) else False
         verboseOut(debug)
     
     # prints the systemd unit file
     elif(re.search(r"^UNIT$", option)):                                  
-        # state['invalid_option'] = False
         print(unit) 
 
-# if(state['invalid_option']):
-if re.search("^-(h|-help)$", sys.argv[1]):
+if len(sys.argv) == 1 or re.search("^-(h|-help)$", sys.argv[1]):
     # print(help)
     promptHelp('')
 
