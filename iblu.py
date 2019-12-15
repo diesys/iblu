@@ -213,7 +213,7 @@ if(len(sys.argv) == 2):                                              ## getting 
         verboseOut(debug)
     
     # prints the systemd unit file
-    elif(re.search(r"^UNIT$", option)):                                  
+    elif(re.search(r"^UNIT$", option)):                                   
         print(unit) 
 
 if len(sys.argv) == 1 or re.search("^-(h|-help)$", sys.argv[1]):
