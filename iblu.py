@@ -27,7 +27,7 @@ unit = "[Unit]\nDescription=Intel BackLight Util, changes owner of /sys/class/bl
 ## IMPORTED FROM MOTOGIF
 HELP = {"asciiart": "   _ __   __\n  (_) / / / _ __\n / / _ \/ / // /\n/_/_.__/_/\_,_/ v",
         "title": "iblu",
-        "version": " v",
+        "version": "",
         "descr": "\nIntel Black-Light Util: a simple utility to change backlight via cli.\n",
         "usage": "\n\t0-100\t\tsets backlight to the given percentage\n\ti (inc)\t\tincreases backlight by a step, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\td (dec)\t\tdecreases backlight, optionally add a number to custom percentage (default is " + str(shift_std_pc) + "%)\n\tc (curr)\t\tshows the current\n\tv\t\tshows verbose output\n\tV\t\tshows very verbose output (for debug)\n\tOFF\t\tturns off backlight (use with a grain of salt)\n\tUNIT\t\tprompts in terminal the Systemd unit raw text (better using with I/O redirecting)\n\n\t--install \tinstall from local directory (a cloned repo!)\n\t--install-git\tclone the online repo and install it into the system\n\t-u, --update\tchek for any new commits from git repo and install them\n\nexample: iblu i30\t#increases of 30% the current backlight (30 is optional)\n",
         # "notes": "\n\n\t! WARNING: motogif may overwrite or remove its own temp files or any files passed as argument",
@@ -205,6 +205,10 @@ if(len(sys.argv) == 2):                                              ## getting 
     elif re.search("^-+(-update|u)$", sys.argv[1]):
         promptHelp('Updating ...', ['asciiart', 'version'])
         update()
+    
+    # version
+    elif re.search("^--version$", sys.argv[1]):
+        print(state['version'])
 
     # turns off
     elif(re.search(r"^OFF$", option)):                                  
